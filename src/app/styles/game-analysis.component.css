@@ -1,0 +1,515 @@
+.analysis-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+.analysis-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.performance-section {
+  margin: 24px 0;
+}
+
+.performance-section h3 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.performance-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 12px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.performance-card:hover {
+  transform: translateY(-4px);
+}
+
+.performance-card.win {
+  background: linear-gradient(135deg, #4caf50, #8bc34a);
+}
+
+.performance-card.draw {
+  background: linear-gradient(135deg, #ff9800, #ffc107);
+}
+
+.performance-card.loss {
+  background: linear-gradient(135deg, #f44336, #e57373);
+}
+
+.performance-card mat-icon {
+  font-size: 32px;
+  height: 32px;
+  width: 32px;
+}
+
+.performance-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.performance-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.performance-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 4px 0;
+}
+
+.performance-percentage {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.win-rate-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.win-rate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.win-rate-value {
+  font-weight: 600;
+  color: #3f51b5;
+  font-size: 18px;
+}
+
+.detailed-ratings {
+  margin: 32px 0;
+}
+
+.detailed-ratings h3 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.ratings-detailed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.detailed-rating-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.detailed-rating-card:hover {
+  border-color: #3f51b5;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.15);
+}
+
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rating-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.rating-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #3f51b5;
+  margin-bottom: 8px;
+}
+
+.rating-details {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+}
+
+.provisional-text {
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.analysis-section {
+  animation: fadeInUp 0.6s ease-out;
+  margin-top: 20px;
+}
+
+.back-button-container {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  padding: 0 16px;
+}
+
+.subtitle {
+  margin: 8px;
+  margin-left: 24px;
+  opacity: 0.5;
+}
+
+.back-button {
+  margin-top: 8px;
+}
+.action-button-container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ratings-detailed-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analysis-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 16px;
+}
+
+.analysis-nav button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.analysis-nav button.active {
+  background: #f3f4f6;
+}
+
+.overview-section,
+.overall-stats-section,
+.opening-stats-section {
+  margin-top: 24px;
+}
+
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  text-align: center;
+}
+
+.loading-section p {
+  margin-top: 16px;
+  color: #666;
+}
+
+.enhanced-performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.enhanced-performance-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.enhanced-performance-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.enhanced-performance-card.games-count {
+  border-left: 4px solid #3f51b5;
+}
+
+.enhanced-performance-card.win-rate {
+  border-left: 4px solid #4caf50;
+}
+
+.enhanced-performance-card.loss-rate {
+  border-left: 4px solid #f44336;
+}
+
+.enhanced-performance-card.draw-rate {
+  border-left: 4px solid #ff9800;
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f5f5f5;
+}
+
+.card-icon mat-icon {
+  font-size: 24px;
+  color: #666;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.card-label {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.performance-comparison {
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+.performance-comparison h4 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.comparison-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comparison-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.comparison-label {
+  min-width: 60px;
+  font-weight: 500;
+  color: #333;
+}
+
+.comparison-bar-container {
+  flex: 1;
+  max-width: 200px;
+}
+
+.comparison-value {
+  min-width: 50px;
+  text-align: right;
+  font-weight: 600;
+  color: #666;
+}
+
+.openings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.opening-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.opening-card:hover {
+  border-color: #3f51b5;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.15);
+}
+
+.opening-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.opening-name {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.opening-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.opening-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.opening-stat.win {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.opening-stat.draw {
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.opening-stat.loss {
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.opening-stat mat-icon {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.opening-stat.win mat-icon {
+  color: #4caf50;
+}
+
+.opening-stat.draw mat-icon {
+  color: #ff9800;
+}
+
+.opening-stat.loss mat-icon {
+  color: #f44336;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-percentage {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #999;
+}
+
+.opening-win-rate {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  text-align: center;
+  color: #666;
+}
+
+.no-data mat-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+@media (max-width: 768px) {
+  .analysis-nav {
+    flex-direction: column;
+  }
+
+  .enhanced-performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .openings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .comparison-bar-container {
+    width: 100%;
+    max-width: none;
+  }
+
+  .opening-stats {
+    grid-template-columns: 1fr;
+  }
+}
