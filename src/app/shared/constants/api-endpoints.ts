@@ -19,4 +19,8 @@ export const API_ENDPOINTS = {
   LICHESS_SEARCH: '/api/lichess/',
 
   LICHESS_PROFILE: '/api/db/local/profile',
+
+  // Chesscom search and sync end points
+  CHESSCOM_SEARCH: '/api/chesscom/',
+  CHESSCOM_SYNC_STATUS: '/api/chesscom/sync/',
 } as const;

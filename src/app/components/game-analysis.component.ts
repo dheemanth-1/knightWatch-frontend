@@ -15,6 +15,7 @@ import {
   OverallStats,
 } from '../services/game-stats.service';
 import { Location } from '@angular/common';
+import { ChesscomProfile } from './chesscom-profile.component';
 
 @Component({
   selector: 'app-game-analysis',
@@ -421,7 +422,7 @@ import { Location } from '@angular/common';
   styleUrl: '/src/app/styles/game-analysis.component.css',
 })
 export class GameAnalysisComponent implements OnInit {
-  @Input() profile!: LichessProfile;
+  @Input() profile!: LichessProfile | ChesscomProfile;
   @Input() analysisRequest!: GameAnalysisRequest | null;
   isLoadingOverall: boolean = false;
   isLoadingOpenings: boolean = false;
@@ -444,8 +445,13 @@ export class GameAnalysisComponent implements OnInit {
   loadOverallStats(): void {
     this.isLoadingOverall = true;
     this.selectedView = 'overall';
-
-    this.gameStatsService.getOverallStats(this.profile?.common.id).subscribe({
+    let username;
+    if ('common' in this.profile) {
+      username = this.profile.common.id;
+    } else {
+      username = (this.profile as ChesscomProfile).userId;
+    }
+    this.gameStatsService.getOverallStats(username).subscribe({
       next: (stats) => {
         this.overallStats = {
           ...stats,
@@ -465,8 +471,13 @@ export class GameAnalysisComponent implements OnInit {
   loadOpeningStats(): void {
     this.isLoadingOpenings = true;
     this.selectedView = 'openings';
-
-    this.gameStatsService.getOpeningStats(this.profile.common.id).subscribe({
+    let username;
+    if ('common' in this.profile) {
+      username = this.profile.common.id;
+    } else {
+      username = (this.profile as ChesscomProfile).userId;
+    }
+    this.gameStatsService.getOpeningStats(username).subscribe({
       next: (stats) => {
         this.openingStats = stats
           .map((stat) => ({
@@ -532,23 +543,64 @@ export class GameAnalysisComponent implements OnInit {
   }
 
   getDetailedRatings(): any[] {
-    const gameTypeNames: { [key: string]: string } = {
-      bullet: 'Bullet',
-      blitz: 'Blitz',
-      rapid: 'Rapid',
-      classical: 'Classical',
-      correspondence: 'Correspondence',
-      puzzle: 'Puzzles',
-    };
+    if (!this.profile) {
+      this.router.navigate(['/']);
+    }
+    if ('common' in this.profile) {
+      const gameTypeNames: { [key: string]: string } = {
+        bullet: 'Bullet',
+        blitz: 'Blitz',
+        rapid: 'Rapid',
+        classical: 'Classical',
+        correspondence: 'Correspondence',
+        puzzle: 'Puzzles',
+      };
 
-    return Object.entries(this.profile.stats.ratings)
-      .map(([key, rating]) => ({
-        name: gameTypeNames[key] || key.charAt(0).toUpperCase() + key.slice(1),
-        rating: rating.rating,
-        games: rating.games,
-        rd: rating.rd,
-        provisional: rating.prov,
-      }))
-      .sort((a, b) => b.games - a.games);
+      return Object.entries(this.profile.stats.ratings)
+        .map(([key, rating]) => ({
+          name:
+            gameTypeNames[key] || key.charAt(0).toUpperCase() + key.slice(1),
+          rating: rating.rating,
+          games: rating.games,
+          rd: rating.rd,
+          provisional: rating.prov,
+        }))
+        .sort((a, b) => b.games - a.games);
+    }
+    const ratings = [
+      [
+        'bullet',
+        {
+          rating: this.profile.bulletRating,
+          games: this.profile.totalGamesBullet,
+        },
+      ],
+      [
+        'blitz',
+        {
+          rating: this.profile.blitzRating,
+          games: this.profile.totalGamesBlitz,
+        },
+      ],
+      [
+        'rapid',
+        {
+          rating: this.profile.rapidRating,
+          games: this.profile.totalGamesRapid,
+        },
+      ],
+      [
+        'classical',
+        {
+          rating: this.profile.classicRating,
+          games: this.profile.totalGamesClassical,
+        },
+      ],
+      ['puzzle', { rating: this.profile.puzzleRating, games: 0 }],
+    ] as [string, { rating: number; games: number }][];
+
+    return ratings.filter(
+      ([_, data]) => data.rating !== undefined && data.rating >= 0
+    );
   }
 }
