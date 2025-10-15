@@ -12,13 +12,13 @@ export const API_ENDPOINTS = {
   STATS_OPENINGS: '/api/stats/openings',
 
   // Lichess Game endpoints
-  LICHESS_GAMES: '/api/db/local/games',
-  LICHESS_GAMES_RECENT: '/api/db/local/games/recent',
+  LOCAL_GAMES: '/api/db/local/games',
+  LOCAL_GAMES_RECENT: '/api/db/local/games/recent',
 
   // Lichess Search endpoints
   LICHESS_SEARCH: '/api/lichess/',
 
-  LICHESS_PROFILE: '/api/db/local/profile',
+  LOCAL_PROFILE: '/api/db/local/profile',
 
   // Chesscom search and sync end points
   CHESSCOM_SEARCH: '/api/chesscom/',

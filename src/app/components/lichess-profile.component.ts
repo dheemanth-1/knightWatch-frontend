@@ -25,7 +25,7 @@ import {
   LichessSyncService,
   SyncResponse,
 } from '../services/lichess-sync.service';
-import { LichessProfileService } from '../services/lichess-profile.service';
+import { ProfileService } from '../services/profile.service';
 import { SyncStatus } from './landing-page.component';
 import { Router } from '@angular/router';
 
@@ -91,7 +91,7 @@ export interface GameAnalysisRequest {
 }
 
 @Component({
-  selector: 'app-profile',
+  selector: 'app-lichess-profile',
   standalone: true,
   imports: [
     CommonModule,
@@ -117,18 +117,22 @@ export interface GameAnalysisRequest {
           <mat-card-title class="profile-title">
             <span>{{ profile.common.name }}</span>
             <mat-chip-set class="status-chips">
-              <mat-chip *ngIf="isOnline()" color="accent" selected>
+              @if(isOnline()) {
+              <mat-chip color="accent" selected>
                 <mat-icon matChipAvatar>fiber_manual_record</mat-icon>
                 Online
               </mat-chip>
-              <mat-chip *ngIf="profile.common.patron" color="warn" selected>
+              } @if(profile.common.patron) {
+              <mat-chip color="warn" selected>
                 <mat-icon matChipAvatar>star</mat-icon>
                 Patron
               </mat-chip>
-              <mat-chip *ngIf="profile.flags.verified" color="primary" selected>
+              } @if(profile.flags.verified) {
+              <mat-chip color="primary" selected>
                 <mat-icon matChipAvatar>verified</mat-icon>
                 Verified
               </mat-chip>
+              }
             </mat-chip-set>
           </mat-card-title>
           <mat-card-subtitle>
@@ -174,24 +178,23 @@ export interface GameAnalysisRequest {
           <div class="ratings-section">
             <h3>Current Ratings</h3>
             <div class="ratings-grid">
-              <div
-                *ngFor="let rating of getActiveRatings()"
-                class="rating-item"
-                [class.provisional]="rating.provisional"
-              >
+              @for (rating of getActiveRatings(); track rating.name) {
+              <div class="rating-item" [class.provisional]="rating.provisional">
                 <div class="game-type">{{ rating.name }}</div>
                 <div class="rating-value">{{ rating.rating }}</div>
                 <div class="games-count">
                   {{ rating.games }}
                   {{ rating.name === 'Puzzles' ? 'puzzles' : 'games' }}
                 </div>
+                @if(rating.provisional) {
                 <mat-icon
-                  *ngIf="rating.provisional"
                   class="provisional-icon"
                   matTooltip="Provisional rating"
                   >help_outline</mat-icon
                 >
+                }
               </div>
+              }
             </div>
           </div>
 
@@ -275,7 +278,8 @@ export interface GameAnalysisRequest {
       </mat-card>
 
       <!-- Loading state -->
-      <div *ngIf="isAnalyzing" class="loading-section">
+      @if(isAnalyzing) {
+      <div class="loading-section">
         <mat-card class="loading-card">
           <mat-card-content>
             <div class="loading-content">
@@ -289,19 +293,19 @@ export interface GameAnalysisRequest {
           </mat-card-content>
         </mat-card>
       </div>
+      }
     </div>
   `,
   styleUrl: '/src/app/styles/profile.component.css',
 })
-export class ProfileComponent {
+export class LichessProfileComponent {
   private _snackBar = inject(MatSnackBar);
   @Input() profile!: LichessProfile;
   @Input() syncStatus!: SyncStatus | null;
   @Output() analyzeGames = new EventEmitter<GameAnalysisRequest>();
   constructor(
-    private snackBar: MatSnackBar,
     private lichessSyncService: LichessSyncService,
-    private lichessProfileService: LichessProfileService,
+    private profileService: ProfileService,
     private router: Router
   ) {}
 
@@ -375,7 +379,7 @@ export class ProfileComponent {
   }
 
   deleteUserData(username: string) {
-    this.lichessProfileService.deleteUserAndSyncedGames(username).subscribe({
+    this.profileService.deleteUserAndSyncedGames(username).subscribe({
       next: (response) => {
         console.log('Delete Response: ', response);
         const dialogRef = this._snackBar.open(
@@ -413,7 +417,6 @@ export class ProfileComponent {
 
     dialogRef.onAction().subscribe(() => {
       this.deleteUserData(this.profile.common.name);
-      //location.reload();
     });
   }
 

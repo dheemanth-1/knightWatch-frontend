@@ -8,8 +8,8 @@ import { LichessSearchService } from '../services/lichess-search.service';
 import {
   GameAnalysisRequest,
   LichessProfile,
-  ProfileComponent,
-} from './profile.component';
+  LichessProfileComponent,
+} from './lichess-profile.component';
 import { ChesscomProfile } from './chesscom-profile.component';
 import { MatRadioModule } from '@angular/material/radio';
 import { Router } from '@angular/router';
@@ -35,105 +35,107 @@ export interface SyncStatus {
 @Component({
   selector: 'app-landing-page',
   template: `
-    <mat-toolbar>
-      <button
-        mat-icon-button
-        class="example-icon"
-        aria-label="Example icon-button with menu icon"
-      >
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Knight Watch</span>
-      <span class="example-spacer"></span>
-      <button
-        mat-icon-button
-        class="example-icon favorite-icon"
-        aria-label="Example icon-button with heart icon"
-      >
-        <mat-icon>favorite</mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        class="example-icon"
-        aria-label="Example icon-button with share icon"
-      >
-        <mat-icon>share</mat-icon>
-      </button>
-    </mat-toolbar>
+    <div class="app-container">
+      <mat-toolbar>
+        <button
+          mat-icon-button
+          class="example-icon"
+          aria-label="Example icon-button with menu icon"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span>Knight Watch</span>
+        <span class="example-spacer"></span>
+        <button
+          mat-icon-button
+          class="example-icon favorite-icon"
+          aria-label="Example icon-button with heart icon"
+        >
+          <mat-icon>favorite</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          class="example-icon"
+          aria-label="Example icon-button with share icon"
+        >
+          <mat-icon>share</mat-icon>
+        </button>
+      </mat-toolbar>
 
-    <div class="hero-section">
-      <h1 class="hero-title">Chess Insights. Instantly*</h1>
-      <p class="hero-sub-p">
-        *Well you do have to wait a bit... Actually it's not instant at all
-      </p>
+      <div class="hero-section">
+        <h1 class="hero-title">Chess Insights. Instantly*</h1>
+        <p class="hero-sub-p">
+          *Well you do have to wait a bit... Actually it's not instant at all
+        </p>
 
-      <form class="search-form" (ngSubmit)="onSearch()" autocomplete="off">
-        <mat-form-field appearance="fill" class="search-field">
-          <mat-label>Search {{ selectedPlatform }} Username</mat-label>
-          <input
-            matInput
-            [(ngModel)]="searchText"
-            name="searchText"
-            type="search"
-            placeholder=""
-            [disabled]="isLoading"
-          />
-          <button
-            matSuffix
-            mat-icon-button
-            aria-label="Search"
-            type="submit"
-            [disabled]="isLoading"
-          >
-            @if (isLoading) {
-            <mat-spinner diameter="20"></mat-spinner>
-            } @else {
-            <mat-icon>search</mat-icon>
-            }
-          </button>
-        </mat-form-field>
-      </form>
-      <label id="example-radio-group-label"
-        >Pick the platform you want to search in.</label
-      >
-      <mat-radio-group
-        aria-labelledby="example-radio-group-label"
-        class="example-radio-group"
-        [(ngModel)]="selectedPlatform"
-        (change)="onPlatformChange()"
-      >
-        <mat-radio-button value="Lichess">Lichess</mat-radio-button>
-        <mat-radio-button value="Chesscom">Chess.com</mat-radio-button>
-      </mat-radio-group>
+        <form class="search-form" (ngSubmit)="onSearch()" autocomplete="off">
+          <mat-form-field appearance="fill" class="search-field">
+            <mat-label>Search {{ selectedPlatform }} Username</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchText"
+              name="searchText"
+              type="search"
+              placeholder=""
+              [disabled]="isLoading"
+            />
+            <button
+              matSuffix
+              mat-icon-button
+              aria-label="Search"
+              type="submit"
+              [disabled]="isLoading"
+            >
+              @if (isLoading) {
+              <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+              <mat-icon>search</mat-icon>
+              }
+            </button>
+          </mat-form-field>
+        </form>
+        <label id="example-radio-group-label"
+          >Pick the platform you want to search in.</label
+        >
+        <mat-radio-group
+          aria-labelledby="example-radio-group-label"
+          class="example-radio-group"
+          [(ngModel)]="selectedPlatform"
+          (change)="onPlatformChange()"
+        >
+          <mat-radio-button value="Lichess">Lichess</mat-radio-button>
+          <mat-radio-button value="Chesscom">Chess.com</mat-radio-button>
+        </mat-radio-group>
 
-      <!-- Error message -->
-      @if (errorMessage) {
-      <div class="error-message">
-        <mat-icon class="error-icon">error</mat-icon>
-        <span>{{ errorMessage }}</span>
+        <!-- Error message -->
+        @if (errorMessage) {
+        <div class="error-message">
+          <mat-icon class="error-icon">error</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+        }
+
+        <!-- Profile Display -->
+        @if (profileData) {
+        <div class="profile-section">
+          <app-lichess-profile
+            (analyzeGames)="getCurrentAnalysisRequest($event)"
+            [profile]="profileData"
+            [syncStatus]="syncStatus"
+          ></app-lichess-profile>
+        </div>
+        }
+
+        <!-- Chesscom Profile Display -->
+        @if(chesscomProfileData) {
+        <div class="profile-section">
+          <app-chesscom-profile
+            (analyzeGames)="getCurrentChesscomAnalysisRequest($event)"
+            [profile]="chesscomProfileData"
+          ></app-chesscom-profile>
+        </div>
+        }
       </div>
-      }
-
-      <!-- Profile Display -->
-      @if (profileData) {
-      <div class="profile-section">
-        <app-profile
-          (analyzeGames)="getCurrentAnalysisRequest($event)"
-          [profile]="profileData"
-          [syncStatus]="syncStatus"
-        ></app-profile>
-      </div>
-      }
-
-      <!-- Chesscom Profile Display -->
-      @if(chesscomProfileData) {
-      <div class="profile-section">
-        <app-chesscom-profile
-          (analyzeGames)="getCurrentChesscomAnalysisRequest($event)"
-          [profile]="chesscomProfileData"
-        ></app-chesscom-profile>
-      </div>
-      }
     </div>
   `,
   styleUrl: '/src/app/styles/landing-page.component.css',
@@ -143,7 +145,7 @@ export interface SyncStatus {
     MatInputModule,
     MatIconModule,
     FormsModule,
-    ProfileComponent,
+    LichessProfileComponent,
     MatChipsModule,
     MatTooltipModule,
     MatProgressSpinnerModule,

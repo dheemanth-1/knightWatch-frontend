@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BaseApiService } from './base-api.service';
 import { catchError, Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../shared/constants/api-endpoints';
-import { LichessProfile } from '../components/profile.component';
+import { LichessProfile } from '../components/lichess-profile.component';
 
 @Injectable({
   providedIn: 'root',

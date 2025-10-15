@@ -1,3 +1,10 @@
+.app-container {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
 .banner-toolbar {
   justify-content: center;
   min-height: 60px;

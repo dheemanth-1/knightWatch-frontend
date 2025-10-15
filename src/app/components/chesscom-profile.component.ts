@@ -18,7 +18,7 @@ import { ChesscomSyncService } from '../services/chesscom-sync.service';
 import { debounceTime, merge, Subject, takeUntil } from 'rxjs';
 import { MatOption } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
-import { LichessProfileService } from '../services/lichess-profile.service';
+import { ProfileService } from '../services/profile.service';
 export interface ChesscomGameAnalysisRequest {
   username: string;
   month: string;
@@ -74,18 +74,17 @@ export interface ChesscomProfile {
         <mat-card-title class="profile-title">
           <span>{{ profile.name }}</span>
           <mat-chip-set class="status-chips">
-            <mat-chip
-              *ngIf="profile.accStatus !== 'basic'"
-              color="warn"
-              selected
-            >
+            @if(profile.accStatus !== 'basic') {
+            <mat-chip color="warn" selected>
               <mat-icon matChipAvatar>star</mat-icon>
               {{ profile.accStatus }}
             </mat-chip>
-            <mat-chip *ngIf="isOnline()" color="accent" selected>
+            } @if(isOnline()) {
+            <mat-chip color="accent" selected>
               <mat-icon matChipAvatar>fiber_manual_record</mat-icon>
               Online
             </mat-chip>
+            }
           </mat-chip-set>
         </mat-card-title>
         <mat-card-subtitle>
@@ -131,24 +130,21 @@ export interface ChesscomProfile {
         <div class="ratings-section">
           <h3>Current Ratings</h3>
           <div class="ratings-grid">
-            <div
-              *ngFor="let rating of getActiveRatings()"
-              class="rating-item"
-              [class.provisional]="rating.provisional"
-            >
+            @for(rating of getActiveRatings(); track rating.name) {
+            <div class="rating-item" [class.provisional]="rating.provisional">
               <div class="game-type">{{ rating.name }}</div>
               <div class="rating-value">{{ rating.rating }}</div>
               <div class="games-count">
                 {{ rating.games }}
                 {{ rating.name === 'Puzzles' ? 'puzzles' : 'games' }}
               </div>
-              <mat-icon
-                *ngIf="rating.provisional"
-                class="provisional-icon"
-                matTooltip="Provisional rating"
+              @if(rating.provisional) {
+              <mat-icon class="provisional-icon" matTooltip="Provisional rating"
                 >help_outline</mat-icon
               >
+              }
             </div>
+            }
           </div>
         </div>
 
@@ -172,9 +168,11 @@ export interface ChesscomProfile {
                 [(ngModel)]="month"
                 (selectionChange)="onMonthChange()"
               >
-                <mat-option *ngFor="let m of months" [value]="m">
+                @for(m of months; track m) {
+                <mat-option [value]="m">
                   {{ getMonthName(m) }}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
 
@@ -182,9 +180,11 @@ export interface ChesscomProfile {
               <mat-label>Enter Year:</mat-label>
 
               <mat-select [(ngModel)]="year" (selectionChange)="onYearChange()">
-                <mat-option *ngFor="let y of years" [value]="y">
+                @for(y of years; track y) {
+                <mat-option [value]="y">
                   {{ y }}
                 </mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>
@@ -192,15 +192,15 @@ export interface ChesscomProfile {
       </mat-card-content>
       <div class="inline-validator">
         <!-- Status display -->
-        <div *ngIf="isChecking">Checking...</div>
-
-        <div *ngIf="!isChecking && isSynced" class="synced">
+        @if(isChecking) {
+        <div>Checking...</div>
+        } @if(!isChecking && isSynced) {
+        <div class="synced">
           ✓ games from month : {{ month }} and year : {{ year }} already synced
         </div>
-
-        <div *ngIf="!isChecking && !isSynced" class="not-synced">
-          Ready to sync
-        </div>
+        } @if(!isChecking && !isSynced) {
+        <div class="not-synced">Ready to sync</div>
+        }
       </div>
       <!-- Actions -->
       <mat-card-actions class="profile-actions">
@@ -220,7 +220,8 @@ export interface ChesscomProfile {
     </mat-card>
 
     <!-- Loading state -->
-    <div *ngIf="isAnalyzing" class="loading-section">
+    @if(isAnalyzing) {
+    <div class="loading-section">
       <mat-card class="loading-card">
         <mat-card-content>
           <div class="loading-content">
@@ -231,6 +232,7 @@ export interface ChesscomProfile {
         </mat-card-content>
       </mat-card>
     </div>
+    }
   </div>`,
   styleUrl: '/src/app/styles/chesscom-profile.component.css',
 })
@@ -258,7 +260,7 @@ export class ChesscomProfileComponent {
 
   constructor(
     private syncStatusService: ChesscomSyncService,
-    private profileService: LichessProfileService,
+    private profileService: ProfileService,
     private router: Router
   ) {}
 

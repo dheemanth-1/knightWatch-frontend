@@ -7,7 +7,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GameAnalysisRequest, LichessProfile } from './profile.component';
+import {
+  GameAnalysisRequest,
+  LichessProfile,
+} from './lichess-profile.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   GameStatsService,
@@ -89,7 +92,8 @@ import { ChesscomProfile } from './chesscom-profile.component';
             <mat-divider></mat-divider>
 
             <!-- Overview Section (Original Content) -->
-            <div *ngIf="selectedView === 'overview'" class="overview-section">
+            @if(selectedView === 'overview') {
+            <div class="overview-section">
               <!-- Performance Overview -->
               <div class="performance-section">
                 <h3>Game Performance Overview</h3>
@@ -157,10 +161,8 @@ import { ChesscomProfile } from './chesscom-profile.component';
               <div class="detailed-ratings">
                 <h3>Rating Breakdown</h3>
                 <div class="ratings-detailed-grid">
-                  <div
-                    *ngFor="let rating of getDetailedRatings()"
-                    class="detailed-rating-card"
-                  >
+                  @for(rating of getDetailedRatings(); track rating.name) {
+                  <div class="detailed-rating-card">
                     <div class="rating-header">
                       <span class="rating-name">{{ rating.name }}</span>
                       <mat-chip
@@ -173,29 +175,26 @@ import { ChesscomProfile } from './chesscom-profile.component';
                     <div class="rating-value">{{ rating.rating }}</div>
                     <div class="rating-details">
                       <span>RD: {{ rating.rd }}</span>
-                      <span *ngIf="rating.provisional" class="provisional-text"
-                        >Provisional</span
-                      >
+                      @if(rating.provisional) {
+                      <span class="provisional-text">Provisional</span>
+                      }
                     </div>
                   </div>
+                  }
                 </div>
               </div>
             </div>
-
+            }
             <!-- Overall Stats Section -->
-            <div
-              *ngIf="selectedView === 'overall'"
-              class="overall-stats-section"
-            >
-              <div *ngIf="isLoadingOverall" class="loading-section">
+            @if(selectedView === 'overall') {
+            <div class="overall-stats-section">
+              @if(isLoadingOverall) {
+              <div class="loading-section">
                 <mat-spinner diameter="40"></mat-spinner>
                 <p>Loading overall statistics...</p>
               </div>
-
-              <div
-                *ngIf="!isLoadingOverall && overallStats"
-                class="stats-content"
-              >
+              } @if(!isLoadingOverall && overallStats) {
+              <div class="stats-content">
                 <h3>Detailed Overall Statistics</h3>
 
                 <!-- Enhanced Performance Cards -->
@@ -300,29 +299,24 @@ import { ChesscomProfile } from './chesscom-profile.component';
                   </div>
                 </div>
               </div>
+              }
             </div>
-
+            }
             <!-- Opening Stats Section -->
-            <div
-              *ngIf="selectedView === 'openings'"
-              class="opening-stats-section"
-            >
-              <div *ngIf="isLoadingOpenings" class="loading-section">
+            @if(selectedView === 'openings') {
+            <div class="opening-stats-section">
+              @if(isLoadingOpenings) {
+              <div class="loading-section">
                 <mat-spinner diameter="40"></mat-spinner>
                 <p>Loading opening statistics...</p>
               </div>
-
-              <div
-                *ngIf="!isLoadingOpenings && openingStats.length > 0"
-                class="openings-content"
-              >
+              } @if(!isLoadingOpenings && openingStats.length > 0) {
+              <div class="openings-content">
                 <h3>Opening Performance Analysis</h3>
 
                 <div class="openings-grid">
-                  <div
-                    *ngFor="let opening of openingStats"
-                    class="opening-card"
-                  >
+                  @for(opening of openingStats; track opening.openingName) {
+                  <div class="opening-card">
                     <div class="opening-header">
                       <h4 class="opening-name">{{ opening.openingName }}</h4>
                       <mat-chip color="primary" selected>
@@ -392,17 +386,17 @@ import { ChesscomProfile } from './chesscom-profile.component';
                       </mat-progress-bar>
                     </div>
                   </div>
+                  }
                 </div>
               </div>
-
-              <div
-                *ngIf="!isLoadingOpenings && openingStats.length === 0"
-                class="no-data"
-              >
+              } @if(!isLoadingOpenings && openingStats.length === 0) {
+              <div class="no-data">
                 <mat-icon>info</mat-icon>
                 <p>No opening statistics available.</p>
               </div>
+              }
             </div>
+            }
           </mat-card-content>
 
           <mat-card-actions class="action-button-container">
