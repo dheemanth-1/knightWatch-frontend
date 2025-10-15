@@ -6,9 +6,9 @@ import { catchError, Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class LichessProfileService extends BaseApiService {
+export class ProfileService extends BaseApiService {
   deleteUserAndSyncedGames(username: string): Observable<any> {
-    const url = this.buildUrl(API_ENDPOINTS.LICHESS_PROFILE + '/{username}', {
+    const url = this.buildUrl(API_ENDPOINTS.LOCAL_PROFILE + '/{username}', {
       username,
     });
     return this.http.delete(url).pipe(catchError(this.handleError));

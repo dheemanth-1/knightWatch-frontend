@@ -7,7 +7,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { GameAnalysisRequest, LichessProfile } from './profile.component';
+import {
+  GameAnalysisRequest,
+  LichessProfile,
+} from './lichess-profile.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   GameStatsService,
@@ -15,6 +18,7 @@ import {
   OverallStats,
 } from '../services/game-stats.service';
 import { Location } from '@angular/common';
+import { ChesscomProfile } from './chesscom-profile.component';
 
 @Component({
   selector: 'app-game-analysis',
@@ -88,7 +92,8 @@ import { Location } from '@angular/common';
             <mat-divider></mat-divider>
 
             <!-- Overview Section (Original Content) -->
-            <div *ngIf="selectedView === 'overview'" class="overview-section">
+            @if(selectedView === 'overview') {
+            <div class="overview-section">
               <!-- Performance Overview -->
               <div class="performance-section">
                 <h3>Game Performance Overview</h3>
@@ -156,10 +161,8 @@ import { Location } from '@angular/common';
               <div class="detailed-ratings">
                 <h3>Rating Breakdown</h3>
                 <div class="ratings-detailed-grid">
-                  <div
-                    *ngFor="let rating of getDetailedRatings()"
-                    class="detailed-rating-card"
-                  >
+                  @for(rating of getDetailedRatings(); track rating.name) {
+                  <div class="detailed-rating-card">
                     <div class="rating-header">
                       <span class="rating-name">{{ rating.name }}</span>
                       <mat-chip
@@ -172,29 +175,26 @@ import { Location } from '@angular/common';
                     <div class="rating-value">{{ rating.rating }}</div>
                     <div class="rating-details">
                       <span>RD: {{ rating.rd }}</span>
-                      <span *ngIf="rating.provisional" class="provisional-text"
-                        >Provisional</span
-                      >
+                      @if(rating.provisional) {
+                      <span class="provisional-text">Provisional</span>
+                      }
                     </div>
                   </div>
+                  }
                 </div>
               </div>
             </div>
-
+            }
             <!-- Overall Stats Section -->
-            <div
-              *ngIf="selectedView === 'overall'"
-              class="overall-stats-section"
-            >
-              <div *ngIf="isLoadingOverall" class="loading-section">
+            @if(selectedView === 'overall') {
+            <div class="overall-stats-section">
+              @if(isLoadingOverall) {
+              <div class="loading-section">
                 <mat-spinner diameter="40"></mat-spinner>
                 <p>Loading overall statistics...</p>
               </div>
-
-              <div
-                *ngIf="!isLoadingOverall && overallStats"
-                class="stats-content"
-              >
+              } @if(!isLoadingOverall && overallStats) {
+              <div class="stats-content">
                 <h3>Detailed Overall Statistics</h3>
 
                 <!-- Enhanced Performance Cards -->
@@ -299,29 +299,24 @@ import { Location } from '@angular/common';
                   </div>
                 </div>
               </div>
+              }
             </div>
-
+            }
             <!-- Opening Stats Section -->
-            <div
-              *ngIf="selectedView === 'openings'"
-              class="opening-stats-section"
-            >
-              <div *ngIf="isLoadingOpenings" class="loading-section">
+            @if(selectedView === 'openings') {
+            <div class="opening-stats-section">
+              @if(isLoadingOpenings) {
+              <div class="loading-section">
                 <mat-spinner diameter="40"></mat-spinner>
                 <p>Loading opening statistics...</p>
               </div>
-
-              <div
-                *ngIf="!isLoadingOpenings && openingStats.length > 0"
-                class="openings-content"
-              >
+              } @if(!isLoadingOpenings && openingStats.length > 0) {
+              <div class="openings-content">
                 <h3>Opening Performance Analysis</h3>
 
                 <div class="openings-grid">
-                  <div
-                    *ngFor="let opening of openingStats"
-                    class="opening-card"
-                  >
+                  @for(opening of openingStats; track opening.openingName) {
+                  <div class="opening-card">
                     <div class="opening-header">
                       <h4 class="opening-name">{{ opening.openingName }}</h4>
                       <mat-chip color="primary" selected>
@@ -391,17 +386,17 @@ import { Location } from '@angular/common';
                       </mat-progress-bar>
                     </div>
                   </div>
+                  }
                 </div>
               </div>
-
-              <div
-                *ngIf="!isLoadingOpenings && openingStats.length === 0"
-                class="no-data"
-              >
+              } @if(!isLoadingOpenings && openingStats.length === 0) {
+              <div class="no-data">
                 <mat-icon>info</mat-icon>
                 <p>No opening statistics available.</p>
               </div>
+              }
             </div>
+            }
           </mat-card-content>
 
           <mat-card-actions class="action-button-container">
@@ -421,7 +416,7 @@ import { Location } from '@angular/common';
   styleUrl: '/src/app/styles/game-analysis.component.css',
 })
 export class GameAnalysisComponent implements OnInit {
-  @Input() profile!: LichessProfile;
+  @Input() profile!: LichessProfile | ChesscomProfile;
   @Input() analysisRequest!: GameAnalysisRequest | null;
   isLoadingOverall: boolean = false;
   isLoadingOpenings: boolean = false;
@@ -444,8 +439,13 @@ export class GameAnalysisComponent implements OnInit {
   loadOverallStats(): void {
     this.isLoadingOverall = true;
     this.selectedView = 'overall';
-
-    this.gameStatsService.getOverallStats(this.profile?.common.id).subscribe({
+    let username;
+    if ('common' in this.profile) {
+      username = this.profile.common.id;
+    } else {
+      username = (this.profile as ChesscomProfile).userId;
+    }
+    this.gameStatsService.getOverallStats(username).subscribe({
       next: (stats) => {
         this.overallStats = {
           ...stats,
@@ -465,8 +465,13 @@ export class GameAnalysisComponent implements OnInit {
   loadOpeningStats(): void {
     this.isLoadingOpenings = true;
     this.selectedView = 'openings';
-
-    this.gameStatsService.getOpeningStats(this.profile.common.id).subscribe({
+    let username;
+    if ('common' in this.profile) {
+      username = this.profile.common.id;
+    } else {
+      username = (this.profile as ChesscomProfile).userId;
+    }
+    this.gameStatsService.getOpeningStats(username).subscribe({
       next: (stats) => {
         this.openingStats = stats
           .map((stat) => ({
@@ -532,23 +537,64 @@ export class GameAnalysisComponent implements OnInit {
   }
 
   getDetailedRatings(): any[] {
-    const gameTypeNames: { [key: string]: string } = {
-      bullet: 'Bullet',
-      blitz: 'Blitz',
-      rapid: 'Rapid',
-      classical: 'Classical',
-      correspondence: 'Correspondence',
-      puzzle: 'Puzzles',
-    };
+    if (!this.profile) {
+      this.router.navigate(['/']);
+    }
+    if ('common' in this.profile) {
+      const gameTypeNames: { [key: string]: string } = {
+        bullet: 'Bullet',
+        blitz: 'Blitz',
+        rapid: 'Rapid',
+        classical: 'Classical',
+        correspondence: 'Correspondence',
+        puzzle: 'Puzzles',
+      };
 
-    return Object.entries(this.profile.stats.ratings)
-      .map(([key, rating]) => ({
-        name: gameTypeNames[key] || key.charAt(0).toUpperCase() + key.slice(1),
-        rating: rating.rating,
-        games: rating.games,
-        rd: rating.rd,
-        provisional: rating.prov,
-      }))
-      .sort((a, b) => b.games - a.games);
+      return Object.entries(this.profile.stats.ratings)
+        .map(([key, rating]) => ({
+          name:
+            gameTypeNames[key] || key.charAt(0).toUpperCase() + key.slice(1),
+          rating: rating.rating,
+          games: rating.games,
+          rd: rating.rd,
+          provisional: rating.prov,
+        }))
+        .sort((a, b) => b.games - a.games);
+    }
+    const ratings = [
+      [
+        'bullet',
+        {
+          rating: this.profile.bulletRating,
+          games: this.profile.totalGamesBullet,
+        },
+      ],
+      [
+        'blitz',
+        {
+          rating: this.profile.blitzRating,
+          games: this.profile.totalGamesBlitz,
+        },
+      ],
+      [
+        'rapid',
+        {
+          rating: this.profile.rapidRating,
+          games: this.profile.totalGamesRapid,
+        },
+      ],
+      [
+        'classical',
+        {
+          rating: this.profile.classicRating,
+          games: this.profile.totalGamesClassical,
+        },
+      ],
+      ['puzzle', { rating: this.profile.puzzleRating, games: 0 }],
+    ] as [string, { rating: number; games: number }][];
+
+    return ratings.filter(
+      ([_, data]) => data.rating !== undefined && data.rating >= 0
+    );
   }
 }
