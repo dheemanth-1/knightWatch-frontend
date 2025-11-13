@@ -19,6 +19,7 @@ import {
 } from '../services/game-stats.service';
 import { Location } from '@angular/common';
 import { ChesscomProfile } from './chesscom-profile.component';
+import { NavWrapperComponent } from './nav-wrapper.component';
 
 @Component({
   selector: 'app-game-analysis',
@@ -32,9 +33,11 @@ import { ChesscomProfile } from './chesscom-profile.component';
     MatDividerModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
+    NavWrapperComponent,
   ],
   template: `
     <div class="analysis-section">
+      <app-nav-wrapper />
       <div class="back-button-container">
         <button
           mat-raised-button
@@ -437,6 +440,12 @@ export class GameAnalysisComponent implements OnInit {
   }
 
   loadOverallStats(): void {
+    let source;
+    if ('common' in this.profile) {
+      source = 'lichess';
+    } else {
+      source = 'chesscom';
+    }
     this.isLoadingOverall = true;
     this.selectedView = 'overall';
     let username;
@@ -445,7 +454,7 @@ export class GameAnalysisComponent implements OnInit {
     } else {
       username = (this.profile as ChesscomProfile).userId;
     }
-    this.gameStatsService.getOverallStats(username).subscribe({
+    this.gameStatsService.getOverallStats(username, source).subscribe({
       next: (stats) => {
         this.overallStats = {
           ...stats,
@@ -463,6 +472,12 @@ export class GameAnalysisComponent implements OnInit {
   }
 
   loadOpeningStats(): void {
+    let source;
+    if ('common' in this.profile) {
+      source = 'lichess';
+    } else {
+      source = 'chesscom';
+    }
     this.isLoadingOpenings = true;
     this.selectedView = 'openings';
     let username;
@@ -471,7 +486,7 @@ export class GameAnalysisComponent implements OnInit {
     } else {
       username = (this.profile as ChesscomProfile).userId;
     }
-    this.gameStatsService.getOpeningStats(username).subscribe({
+    this.gameStatsService.getOpeningStats(username, source).subscribe({
       next: (stats) => {
         this.openingStats = stats
           .map((stat) => ({

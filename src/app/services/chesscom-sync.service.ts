@@ -17,7 +17,11 @@ export class ChesscomSyncService extends BaseApiService {
       }
     );
 
-    return this.http.get(url).pipe(catchError(this.handleError));
+    return this.http
+      .get(url, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   syncGamesOfMonth(username: string, year: number, month: number) {
@@ -30,6 +34,10 @@ export class ChesscomSyncService extends BaseApiService {
         month: month.toString(),
       }
     );
-    return this.http.get(url).pipe(catchError(this.handleError));
+    return this.http
+      .get(url, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 }

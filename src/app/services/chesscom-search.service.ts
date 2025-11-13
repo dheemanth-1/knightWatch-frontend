@@ -16,7 +16,9 @@ export class ChesscomSearchService extends BaseApiService {
     );
 
     return this.http
-      .get<ChesscomProfile>(url)
+      .get<ChesscomProfile>(url, {
+        withCredentials: true,
+      })
       .pipe(catchError(this.handleError));
   }
 }
