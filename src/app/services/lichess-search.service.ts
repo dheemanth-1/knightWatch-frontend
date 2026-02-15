@@ -17,7 +17,9 @@ export class LichessSearchService extends BaseApiService {
     );
 
     return this.http
-      .get<LichessProfile>(url)
+      .get<LichessProfile>(url, {
+        withCredentials: true,
+      })
       .pipe(catchError(this.handleError));
   }
 }

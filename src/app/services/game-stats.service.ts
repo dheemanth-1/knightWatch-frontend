@@ -27,24 +27,38 @@ export class GameStatsService extends BaseApiService {
   /**
    * Get overall statistics for a user
    */
-  getOverallStats(userId: string): Observable<OverallStats> {
-    const url = this.buildUrl(API_ENDPOINTS.STATS_OVERALL + '/{userId}', {
-      userId,
-    });
+  getOverallStats(userId: string, source: string): Observable<OverallStats> {
+    const url = this.buildUrl(
+      API_ENDPOINTS.STATS_OVERALL + '/{userId}/{source}',
+      {
+        userId,
+        source,
+      }
+    );
 
-    return this.http.get<OverallStats>(url).pipe(catchError(this.handleError));
+    return this.http
+      .get<OverallStats>(url, {
+        withCredentials: true,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   /**
    * Get opening statistics for a user
    */
-  getOpeningStats(userId: string): Observable<OpeningStats[]> {
-    const url = this.buildUrl(API_ENDPOINTS.STATS_OPENINGS + '/{userId}', {
-      userId,
-    });
+  getOpeningStats(userId: string, source: string): Observable<OpeningStats[]> {
+    const url = this.buildUrl(
+      API_ENDPOINTS.STATS_OPENINGS + '/{userId}/{source}',
+      {
+        userId,
+        source,
+      }
+    );
 
     return this.http
-      .get<OpeningStats[]>(url)
+      .get<OpeningStats[]>(url, {
+        withCredentials: true,
+      })
       .pipe(catchError(this.handleError));
   }
 }

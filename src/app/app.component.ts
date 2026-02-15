@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { LichessSyncService } from './services/lichess-sync.service';
 import { GameStatsService } from './services/game-stats.service';
-import { LandingPageComponent } from './components/landing-page.component';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +23,7 @@ export class AppComponent {
     this.currentUsername = username;
   }
   getGamesCount(): void {
-    this.lichessSyncService.getGamesCount('drdoof1').subscribe({
+    this.lichessSyncService.getGamesCount(this.currentUsername).subscribe({
       next: (response) => {
         console.log('Games count:', response);
       },
@@ -35,24 +34,28 @@ export class AppComponent {
   }
 
   getGamesStatsOverall(): void {
-    this.gameStatsService.getOverallStats('drdoof1').subscribe({
-      next: (response) => {
-        console.log('Overall Stats:', response);
-      },
-      error: (error) => {
-        console.error('Failed to get overall stats:', error);
-      },
-    });
+    this.gameStatsService
+      .getOverallStats(this.currentUsername, 'lichess')
+      .subscribe({
+        next: (response) => {
+          console.log('Overall Stats:', response);
+        },
+        error: (error) => {
+          console.error('Failed to get overall stats:', error);
+        },
+      });
   }
 
   getStatsBreakdownByOpening(): void {
-    this.gameStatsService.getOpeningStats('drdoof1').subscribe({
-      next: (response) => {
-        console.log('Opening Stats:', response);
-      },
-      error: (error) => {
-        console.error('Failed to get Opening Stats:', error);
-      },
-    });
+    this.gameStatsService
+      .getOpeningStats(this.currentUsername, 'lichess')
+      .subscribe({
+        next: (response) => {
+          console.log('Opening Stats:', response);
+        },
+        error: (error) => {
+          console.error('Failed to get Opening Stats:', error);
+        },
+      });
   }
 }

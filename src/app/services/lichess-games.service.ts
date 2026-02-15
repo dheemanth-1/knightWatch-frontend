@@ -26,7 +26,7 @@ export class LichessGameService extends BaseApiService {
     page?: number,
     limit?: number
   ): Observable<LichessGame[]> {
-    const url = this.buildUrl(API_ENDPOINTS.LICHESS_GAMES + '/{username}', {
+    const url = this.buildUrl(API_ENDPOINTS.LOCAL_GAMES + '/{username}', {
       username,
     });
     const params = this.createHttpParams({ page, limit });
@@ -41,7 +41,7 @@ export class LichessGameService extends BaseApiService {
    */
   getRecentGames(username: string, limit?: number): Observable<LichessGame[]> {
     const url = this.buildUrl(
-      API_ENDPOINTS.LICHESS_GAMES_RECENT + '/{username}',
+      API_ENDPOINTS.LOCAL_GAMES_RECENT + '/{username}',
       { username }
     );
     const params = this.createHttpParams({ limit });

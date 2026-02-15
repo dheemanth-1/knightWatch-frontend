@@ -36,7 +36,13 @@ export class LichessSyncService extends BaseApiService {
       : undefined;
 
     return this.http
-      .post<SyncResponse>(url, {}, { params })
+      .post<SyncResponse>(
+        url,
+        {
+          withCredentials: true,
+        },
+        { params }
+      )
       .pipe(catchError(this.handleError));
   }
 
@@ -50,7 +56,9 @@ export class LichessSyncService extends BaseApiService {
     );
 
     return this.http
-      .get<GamesCountResponse>(url)
+      .get<GamesCountResponse>(url, {
+        withCredentials: true,
+      })
       .pipe(catchError(this.handleError));
   }
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +23,8 @@ import {
   ChesscomGameAnalysisRequest,
   ChesscomProfileComponent,
 } from './chesscom-profile.component';
+import { combineLatest, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { NavWrapperComponent } from './nav-wrapper.component';
 
 export interface SyncStatus {
   lastSync: string;
@@ -31,12 +33,13 @@ export interface SyncStatus {
   syncUpToDate: boolean;
   username: string;
 }
-
+type Platform = 'Lichess' | 'Chesscom';
 @Component({
   selector: 'app-landing-page',
   template: `
     <div class="app-container">
-      <mat-toolbar>
+      <app-nav-wrapper />
+      <!-- <mat-toolbar>
         <button
           mat-icon-button
           class="example-icon"
@@ -60,7 +63,7 @@ export interface SyncStatus {
         >
           <mat-icon>share</mat-icon>
         </button>
-      </mat-toolbar>
+      </mat-toolbar> -->
 
       <div class="hero-section">
         <h1 class="hero-title">Chess Insights. Instantly*</h1>
@@ -68,7 +71,36 @@ export interface SyncStatus {
           *Well you do have to wait a bit... Actually it's not instant at all
         </p>
 
-        <form class="search-form" (ngSubmit)="onSearch()" autocomplete="off">
+        <!-- Fixed: Moved form outside or simplified structure -->
+        <div class="search-container">
+          <mat-form-field appearance="fill" class="search-field">
+            <mat-label>Search {{ selectedPlatform }} Username</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchText"
+              name="searchText"
+              type="text"
+              placeholder="Enter username"
+              [disabled]="isLoading"
+              (keyup.enter)="onSearch()"
+            />
+            <button
+              matSuffix
+              mat-icon-button
+              aria-label="Search"
+              (click)="onSearch()"
+              [disabled]="isLoading || !searchText.trim()"
+            >
+              @if (isLoading) {
+              <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+              <mat-icon>search</mat-icon>
+              }
+            </button>
+          </mat-form-field>
+        </div>
+
+        <!-- <form class="search-form" (ngSubmit)="onSearch()" autocomplete="off">
           <mat-form-field appearance="fill" class="search-field">
             <mat-label>Search {{ selectedPlatform }} Username</mat-label>
             <input
@@ -93,7 +125,7 @@ export interface SyncStatus {
               }
             </button>
           </mat-form-field>
-        </form>
+        </form> -->
         <label id="example-radio-group-label"
           >Pick the platform you want to search in.</label
         >
@@ -116,11 +148,11 @@ export interface SyncStatus {
         }
 
         <!-- Profile Display -->
-        @if (profileData) {
+        @if (lichessProfileData) {
         <div class="profile-section">
           <app-lichess-profile
             (analyzeGames)="getCurrentAnalysisRequest($event)"
-            [profile]="profileData"
+            [profile]="lichessProfileData"
             [syncStatus]="syncStatus"
           ></app-lichess-profile>
         </div>
@@ -151,11 +183,14 @@ export interface SyncStatus {
     MatProgressSpinnerModule,
     MatRadioModule,
     ChesscomProfileComponent,
+    NavWrapperComponent,
   ],
   standalone: true,
 })
-export class LandingPageComponent {
-  selectedPlatform: string = 'Lichess';
+export class LandingPageComponent implements OnInit {
+  private destroy$ = new Subject<void>();
+  selectedPlatform: Platform = 'Lichess';
+  private isInitialLoad = true;
   constructor(
     private lichessSearchService: LichessSearchService,
     private router: Router,
@@ -166,7 +201,7 @@ export class LandingPageComponent {
   @Output() usernameChange = new EventEmitter<string>();
   searchText: string = '';
   chesscomProfileData: ChesscomProfile | null = null;
-  profileData: LichessProfile | null = null;
+  lichessProfileData: LichessProfile | null = null;
   isLoading: boolean = false;
   errorMessage: string = '';
   currentAnalysisRequest:
@@ -177,47 +212,88 @@ export class LandingPageComponent {
   isSyncStatusLoading: boolean = false;
 
   ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      const username = params['username'];
-      if (username) {
-        this.searchText = username;
-        this.route.queryParams.subscribe((queryParams) => {
-          this.selectedPlatform = queryParams['platform'] || 'Lichess';
-          this.performSearch(username);
-        });
-      }
-    });
+    this.route.params
+      .pipe(
+        takeUntil(this.destroy$),
+        distinctUntilChanged(
+          (prev, curr) => prev['username'] === curr['username']
+        )
+      )
+      .subscribe((params) => {
+        const username = params['username'];
 
-    this.route.paramMap.subscribe((params) => {
-      const platform = params.get('platform');
-      if (platform) {
-        this.selectedPlatform = platform;
-      } else {
-        this.selectedPlatform = 'Lichess';
-      }
-    });
+        // Get platform from query params
+        this.route.queryParams
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((queryParams) => {
+            const platformFromQuery = queryParams['platform'] as Platform;
+
+            // Only update platform if it's explicitly set or if it's initial load
+            if (
+              platformFromQuery &&
+              ['Lichess', 'Chesscom'].includes(platformFromQuery)
+            ) {
+              this.selectedPlatform = platformFromQuery;
+            } else if (this.isInitialLoad) {
+              // Only set default on initial load, not on subsequent navigations
+              this.selectedPlatform = 'Lichess';
+            }
+
+            console.log('Current platform:', this.selectedPlatform);
+
+            // Perform search if username exists
+            if (username && username.trim()) {
+              this.searchText = username;
+              this.performSearch(username);
+            } else {
+              // No username in route, just update UI state
+              this.clearAllData();
+            }
+
+            this.isInitialLoad = false;
+          });
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSearch() {
     if (!this.searchText.trim()) return;
+    const trimmedUsername = this.searchText.trim();
+    console.log('Searching:', trimmedUsername, 'on', this.selectedPlatform);
 
-    this.router.navigate(
-      ['/profile', this.searchText.trim(), this.selectedPlatform],
-      {
-        queryParams: { platform: this.selectedPlatform },
-      }
-    );
+    // Navigate with both username and platform
+    this.router.navigate(['/profile', trimmedUsername], {
+      queryParams: { platform: this.selectedPlatform },
+      // Don't use queryParamsHandling to ensure clean state
+    });
   }
 
   onPlatformChange(): void {
-    if (this.router.url !== '/') {
-      this.router.navigate(['/', this.selectedPlatform]);
+    console.log('Platform changed to:', this.selectedPlatform);
+    const currentUsername = this.searchText.trim();
+
+    if (currentUsername) {
+      // If there's a username, navigate with new platform
+      this.router.navigate(['/profile', currentUsername], {
+        queryParams: { platform: this.selectedPlatform },
+      });
+    } else {
+      // No username, just update query params
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { platform: this.selectedPlatform },
+        queryParamsHandling: 'merge',
+      });
+      this.clearAllData();
     }
-    this.clearAllData();
   }
 
   private clearAllData(): void {
-    this.profileData = null;
+    this.lichessProfileData = null;
     this.chesscomProfileData = null;
     this.errorMessage = '';
     this.syncStatus = null;
@@ -225,17 +301,21 @@ export class LandingPageComponent {
   }
 
   private performSearch(username: string): void {
+    if (this.isLoading) {
+      console.log('Search already in progress, skipping...');
+      return;
+    }
+
     this.isLoading = true;
     this.clearAllData();
-    console.log('platform ', this.selectedPlatform);
+
     if (this.selectedPlatform === 'Lichess') {
-      console.log('Searching lichess for:', username);
       this.loadLichessSyncStatus(username);
 
       this.lichessSearchService.searchLichess(username).subscribe({
         next: (response) => {
           console.log('Lichess profile:', response);
-          this.profileData = response;
+          this.lichessProfileData = response;
           this.isLoading = false;
           this.usernameChange.emit(username);
         },
@@ -244,11 +324,10 @@ export class LandingPageComponent {
           this.errorMessage =
             'User not found or there was an error fetching the profile. Please try again.';
           this.isLoading = false;
-          this.profileData = null;
+          this.lichessProfileData = null;
         },
       });
     } else if (this.selectedPlatform === 'Chesscom') {
-      console.log('Searching chesscom for:', username);
       this.chesscomSearchService.searchChesscom(username).subscribe({
         next: (response) => {
           console.log('Chesscom Profile :', response);
@@ -261,7 +340,7 @@ export class LandingPageComponent {
           this.errorMessage =
             'User not found or there was an error fetching the profile. Please try again.';
           this.isLoading = false;
-          this.profileData = null;
+          this.lichessProfileData = null;
         },
       });
     }
@@ -277,7 +356,7 @@ export class LandingPageComponent {
 
     this.router.navigate(['/analysis'], {
       state: {
-        profile: this.profileData,
+        profile: this.lichessProfileData,
         analysisRequest: analysisRequest,
       },
     });
@@ -288,7 +367,7 @@ export class LandingPageComponent {
 
     this.router.navigate(['/analysis'], {
       state: {
-        profile: this.profileData,
+        profile: this.chesscomProfileData,
         analysisRequest: analysisRequest,
       },
     });
@@ -310,17 +389,20 @@ export class LandingPageComponent {
     if (!usernameToSearch) return;
 
     this.isSyncStatusLoading = true;
-    this.syncStatusService.getSyncStatus(usernameToSearch).subscribe({
-      next: (status) => {
-        this.syncStatus = status;
-        this.isSyncStatusLoading = false;
-      },
-      error: (error) => {
-        console.error('Failed to load sync status:', error);
-        this.syncStatus = null;
-        this.isSyncStatusLoading = false;
-      },
-    });
+    this.syncStatusService
+      .getSyncStatus(usernameToSearch)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (status) => {
+          this.syncStatus = status;
+          this.isSyncStatusLoading = false;
+        },
+        error: (error) => {
+          console.error('Failed to load sync status:', error);
+          this.syncStatus = null;
+          this.isSyncStatusLoading = false;
+        },
+      });
   }
 
   refreshSyncStatus(): void {

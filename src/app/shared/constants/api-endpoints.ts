@@ -23,4 +23,6 @@ export const API_ENDPOINTS = {
   // Chesscom search and sync end points
   CHESSCOM_SEARCH: '/api/chesscom/',
   CHESSCOM_SYNC_STATUS: '/api/chesscom/sync/',
+
+  AUTH: '/auth',
 } as const;
